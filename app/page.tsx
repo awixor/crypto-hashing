@@ -1,38 +1,80 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { hashKeccak256, hashSHA256 } from "./utils/hashing";
-import { HashInput } from "./components/HashInput";
+import { useState, useMemo, useEffect } from "react";
+import { computeAllHashes } from "./utils/hashing";
+import { TextInput } from "./components/TextInput";
+import { FileInput } from "./components/FileInput";
+import { HashResult } from "./components/HashResult";
+import { Toggle } from "./components/Toggle";
+
+enum InputMode {
+  Text = "text",
+  File = "file",
+}
 
 export default function Home() {
+  const [inputMode, setInputMode] = useState<InputMode>(InputMode.Text);
   const [input, setInput] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileBytes, setFileBytes] = useState<Uint8Array | null>(null);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
 
-  const hashKeccak = useMemo(() => {
-    if (!input.trim()) {
-      return "";
-    }
-    try {
-      return hashKeccak256(input);
-    } catch (error) {
-      console.error("Hashing error:", error);
-      return "Error occurred";
-    }
-  }, [input]);
+  useEffect(() => {
+    let cancelled = false;
 
-  const hashSHA = useMemo(() => {
-    if (!input.trim()) {
-      return "";
+    const loadFile = async () => {
+      if (!selectedFile) {
+        setFileBytes(null);
+        setIsLoadingFile(false);
+        return;
+      }
+
+      setIsLoadingFile(true);
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (cancelled) return;
+
+        const arrayBuffer = e.target?.result as ArrayBuffer;
+
+        setFileBytes(new Uint8Array(arrayBuffer));
+        setIsLoadingFile(false);
+      };
+      reader.onerror = () => {
+        if (cancelled) return;
+        console.error("Error reading file");
+
+        setIsLoadingFile(false);
+        setFileBytes(null);
+      };
+      reader.readAsArrayBuffer(selectedFile);
+    };
+
+    loadFile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedFile]);
+
+  const hashInput = useMemo(() => {
+    if (inputMode === InputMode.Text) {
+      return input.trim() ? input : null;
+    } else {
+      return fileBytes;
     }
-    try {
-      return hashSHA256(input);
-    } catch (error) {
-      console.error("Hashing error:", error);
-      return "Error occurred";
-    }
-  }, [input]);
+  }, [inputMode, input, fileBytes]);
+
+  const hashes = useMemo(() => {
+    return computeAllHashes(hashInput);
+  }, [hashInput]);
 
   const handleClear = () => {
-    setInput("");
+    if (inputMode === InputMode.Text) {
+      setInput("");
+    } else {
+      setSelectedFile(null);
+    }
   };
 
   const handleCopy = (text: string) => {
@@ -48,57 +90,54 @@ export default function Home() {
               Hash Visualizer
             </h1>
             <p className="text-lg text-zinc-600 dark:text-zinc-400">
-              Type text below to instantly generate Keccak-256 and SHA-256
+              Hash text or files to instantly generate Keccak-256 and SHA-256
               hashes
             </p>
           </div>
 
-          <HashInput value={input} onChange={setInput} onClear={handleClear} />
+          <Toggle
+            items={[
+              { label: "Text", value: InputMode.Text },
+              { label: "File", value: InputMode.File },
+            ]}
+            activeValue={inputMode}
+            onChange={(value) => {
+              const mode = value as InputMode;
+              setInputMode(mode);
+
+              if (mode === InputMode.Text) {
+                setSelectedFile(null);
+              } else {
+                setInput("");
+              }
+            }}
+          />
+
+          {inputMode === InputMode.Text ? (
+            <TextInput
+              value={input}
+              onChange={setInput}
+              onClear={handleClear}
+            />
+          ) : (
+            <FileInput
+              onFileSelect={setSelectedFile}
+              selectedFile={selectedFile}
+              isLoading={isLoadingFile}
+            />
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-                  Keccak-256
-                </label>
-                <button
-                  onClick={() => handleCopy(hashKeccak)}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-                >
-                  Copy
-                </button>
-              </div>
-              <div className="relative">
-                <div className="min-h-[50px] px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 font-mono text-sm text-zinc-800 dark:text-zinc-200 break-all">
-                  {hashKeccak}
-                </div>
-              </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Length: {hashKeccak.length} characters
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-                  SHA-256
-                </label>
-                <button
-                  onClick={() => handleCopy(hashSHA)}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-                >
-                  Copy
-                </button>
-              </div>
-              <div className="relative">
-                <div className="min-h-[50px] px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 font-mono text-sm text-zinc-800 dark:text-zinc-200 break-all">
-                  {hashSHA}
-                </div>
-              </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Length: {hashSHA.length} characters
-              </p>
-            </div>
+            <HashResult
+              label="Keccak-256"
+              hash={hashes.keccak256}
+              onCopy={() => handleCopy(hashes.keccak256)}
+            />
+            <HashResult
+              label="SHA-256"
+              hash={hashes.sha256}
+              onCopy={() => handleCopy(hashes.sha256)}
+            />
           </div>
 
           <div className="mt-8 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
