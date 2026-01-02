@@ -5,6 +5,7 @@ import { HashMessage } from "./HashMessage";
 import { SignMessage } from "./SignMessage";
 import { RecoverPublicKey } from "./RecoverPublicKey";
 import { GenerateAddress } from "./GenerateAddress";
+import { VerifySignature } from "./VerifySignature";
 
 export function DigitalSignature() {
   const [messageHash, setMessageHash] = useState("");
@@ -27,13 +28,6 @@ export function DigitalSignature() {
 
   const handleMessageHash = (hash: string) => {
     setMessageHash(hash);
-  };
-
-  const handleClear = () => {
-    setMessageHash("");
-    setSignature("");
-    setRecovery(null);
-    setPublicKey("");
   };
 
   return (
@@ -66,14 +60,7 @@ export function DigitalSignature() {
 
       <GenerateAddress publicKey={publicKey} onCopy={handleCopy} />
 
-      <div className="flex justify-end">
-        <button
-          onClick={handleClear}
-          className="px-6 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-        >
-          Clear All
-        </button>
-      </div>
+      <VerifySignature />
     </div>
   );
 }

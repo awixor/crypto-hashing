@@ -117,3 +117,27 @@ export function generatePrivateKey(): string {
 
   return bytesToHex(privateKey);
 }
+
+/**
+ * Verify a signature using a public key and message hash
+ * @param messageHash - The hashed message (hex string)
+ * @param signature - The signature (hex string, 64 bytes)
+ * @param publicKey - The public key (hex string, uncompressed, 65 bytes)
+ * @returns True if the signature is valid, false otherwise
+ */
+export function verifySignature(
+  messageHash: string,
+  signature: string,
+  publicKey: string
+): boolean {
+  try {
+    const msgHashBytes = hexToBytes(messageHash);
+    const sigBytes = hexToBytes(signature);
+    const pubKeyBytes = hexToBytes(publicKey);
+
+    return secp256k1.verify(sigBytes, msgHashBytes, pubKeyBytes);
+  } catch (error) {
+    console.error("Signature verification error:", error);
+    return false;
+  }
+}
