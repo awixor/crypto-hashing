@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Crypto Hashing
 
-## Getting Started
+A modern web application for practicing cryptographic methods and hashing mechanisms. Built with Next.js, this tool provides an interactive interface for hashing text/files and working with digital signatures.
 
-First, run the development server:
+🔗 **Live Demo:** [crypto-hashing.vercel.app](https://crypto-hashing.vercel.app)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Features
+
+### 🔐 Hash Visualizer
+- **Keccak-256** hashing for text and files
+- **SHA-256** hashing for text and files
+- Support for both text input and file upload
+- Real-time hash generation
+- Copy to clipboard functionality
+
+### ✍️ Digital Signature Process
+Complete workflow for Ethereum-style digital signatures:
+
+1. **Hash the Message** - Generate Keccak-256 hash of your message
+2. **Sign the Message** - Sign the hash with a private key using ECDSA
+   - Generate random private keys
+   - View signature components (r, s, recovery bit)
+   - Display v values (Legacy, EIP-155)
+   - Show yParity for EIP-1559/EIP-2930 transactions
+3. **Recover Public Key** - Recover the public key from signature and recovery bit
+4. **Generate Address** - Convert public key to Ethereum address
+5. **Verify Signature** - Verify signatures against message hash and public key
+
+## Tech Stack
+
+- **Framework:** [Next.js 16](https://nextjs.org/) with App Router
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS 4
+- **Cryptography:**
+  - [@noble/hashes](https://github.com/paulmillr/noble-hashes) - Fast, audited hash implementations
+  - [@noble/secp256k1](https://github.com/paulmillr/noble-secp256k1) - ECDSA signing and verification
+- **React:** 19.2.3
+
+
+1. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Project Structure
+
+```
+app/
+├── components/          # React components
+│   ├── icons/          # Icon components
+│   ├── CopyButton.tsx   # Clipboard copy button
+│   ├── DigitalSignature.tsx
+│   ├── FileInput.tsx
+│   ├── Footer.tsx
+│   ├── GenerateAddress.tsx
+│   ├── HashMessage.tsx
+│   ├── HashResult.tsx
+│   ├── HashVisualizer.tsx
+│   ├── Navigation.tsx
+│   ├── RecoverPublicKey.tsx
+│   ├── SignMessage.tsx
+│   ├── StepBadge.tsx
+│   ├── TextInput.tsx
+│   ├── Toggle.tsx
+│   └── VerifySignature.tsx
+├── digital-signature/   # Digital signature page
+├── utils/              # Utility functions
+│   ├── clipboard.ts    # Clipboard operations
+│   ├── hashing.ts     # Hash functions
+│   └── signature.ts   # Digital signature functions
+├── layout.tsx          # Root layout
+└── page.tsx            # Home page
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Available Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `pnpm run dev` - Start development server
+- `pnpm run build` - Build for production
+- `pnpm run start` - Start production server
+- `pnpm run lint` - Run ESLint
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Features in Detail
 
-## Learn More
+### Hash Visualizer
+- Input text or upload files
+- Generate Keccak-256 and SHA-256 hashes
+- View hash length and copy to clipboard
+- Toggle between text and file input modes
 
-To learn more about Next.js, take a look at the following resources:
+### Digital Signature Workflow
+- **Message Hashing:** Hash messages using Keccak-256 (Ethereum standard)
+- **Signing:** ECDSA signing with secp256k1 curve
+- **Key Recovery:** Recover public keys from signatures
+- **Address Generation:** Convert public keys to Ethereum addresses
+- **Verification:** Verify signature authenticity
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contributing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This project is open source and available under the [MIT License](LICENSE).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Acknowledgments
+
+- [@noble/hashes](https://github.com/paulmillr/noble-hashes) - Excellent cryptographic library
+- [@noble/secp256k1](https://github.com/paulmillr/noble-secp256k1) - Secure ECDSA implementation
+- [Next.js](https://nextjs.org/) - Amazing React framework
+
+---
+
+Made with ❤️ by [awixor](https://github.com/awixor)
