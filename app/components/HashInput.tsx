@@ -4,11 +4,7 @@ interface HashInputProps {
   onClear: () => void;
 }
 
-export function HashInput({
-  value,
-  onChange,
-  onClear,
-}: HashInputProps) {
+export function HashInput({ value, onChange, onClear }: HashInputProps) {
   return (
     <div className="space-y-4">
       <label
@@ -35,4 +31,3 @@ export function HashInput({
     </div>
   );
 }
-
