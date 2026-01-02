@@ -1,16 +1,19 @@
+"use client";
+
 import { useState } from "react";
 import { HashResult } from "./HashResult";
+import { StepBadge } from "./StepBadge";
 import { publicKeyToAddress } from "../utils/signature";
 import { keccak_256 } from "@noble/hashes/sha3";
 import { hexToBytes, bytesToHex } from "@noble/hashes/utils";
 
 interface GenerateAddressProps {
   publicKey: string;
-  onCopy: (text: string) => void;
 }
 
-export function GenerateAddress({ publicKey, onCopy }: GenerateAddressProps) {
+export function GenerateAddress({ publicKey }: GenerateAddressProps) {
   const [address, setAddress] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [addressSteps, setAddressSteps] = useState<{
     pubKeyWithoutPrefix: string;
     keccakHash: string;
@@ -18,9 +21,12 @@ export function GenerateAddress({ publicKey, onCopy }: GenerateAddressProps) {
   } | null>(null);
 
   const handleGenerateAddress = () => {
+    setError(null);
     if (!publicKey) {
+      setError("Public key is required");
       return;
     }
+
     try {
       const addr = publicKeyToAddress(publicKey);
       setAddress(addr);
@@ -39,33 +45,32 @@ export function GenerateAddress({ publicKey, onCopy }: GenerateAddressProps) {
       console.error("Address generation error:", error);
       setAddress("Error occurred");
       setAddressSteps(null);
+      setError("Failed to generate address. Please check your public key.");
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white text-sm font-semibold">
-          4
-        </span>
-        <h2 className="text-xl font-semibold text-black dark:text-zinc-50">
-          Generate Address from Public Key
-        </h2>
-      </div>
+      <StepBadge stepNumber={4} title="Generate Address from Public Key" />
+      {error && (
+        <div
+          className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
+          role="alert"
+        >
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      )}
       <button
         onClick={handleGenerateAddress}
         disabled={!publicKey}
         className="w-full px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:bg-zinc-400 disabled:cursor-not-allowed transition-colors"
+        aria-label="Generate Ethereum address from public key"
       >
         Generate Address
       </button>
       {address && (
         <>
-          <HashResult
-            label="Ethereum Address"
-            hash={address}
-            onCopy={() => onCopy(address)}
-          />
+          <HashResult label="Ethereum Address" hash={address} />
           <div className="space-y-2 text-xs text-zinc-500 dark:text-zinc-400">
             <p>
               Generated using:{" "}

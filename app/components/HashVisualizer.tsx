@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { computeAllHashes } from "../utils/hashing";
 import { TextInput } from "./TextInput";
 import { FileInput } from "./FileInput";
@@ -66,17 +66,13 @@ export function HashVisualizer() {
     return computeAllHashes(hashInput);
   }, [hashInput]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     if (inputMode === InputMode.Text) {
       setInput("");
     } else {
       setSelectedFile(null);
     }
-  };
-
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
+  }, [inputMode]);
 
   return (
     <div className="w-full space-y-8">
@@ -117,16 +113,8 @@ export function HashVisualizer() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <HashResult
-          label="Keccak-256"
-          hash={hashes.keccak256}
-          onCopy={() => handleCopy(hashes.keccak256)}
-        />
-        <HashResult
-          label="SHA-256"
-          hash={hashes.sha256}
-          onCopy={() => handleCopy(hashes.sha256)}
-        />
+        <HashResult label="Keccak-256" hash={hashes.keccak256} />
+        <HashResult label="SHA-256" hash={hashes.sha256} />
       </div>
 
       <div className="mt-8 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">

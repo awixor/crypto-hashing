@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { HashMessage } from "./HashMessage";
 import { SignMessage } from "./SignMessage";
 import { RecoverPublicKey } from "./RecoverPublicKey";
@@ -13,22 +13,18 @@ export function DigitalSignature() {
   const [recovery, setRecovery] = useState<number | null>(null);
   const [publicKey, setPublicKey] = useState("");
 
-  const handleSignature = (sig: string, rec: number) => {
-    setSignature(sig);
-    setRecovery(rec);
-  };
+  const handleSignature = useCallback((signature: string, recovery: number) => {
+    setSignature(signature);
+    setRecovery(recovery);
+  }, []);
 
-  const handlePublicKey = (pubKey: string) => {
+  const handlePublicKey = useCallback((pubKey: string) => {
     setPublicKey(pubKey);
-  };
+  }, []);
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
-
-  const handleMessageHash = (hash: string) => {
+  const handleMessageHash = useCallback((hash: string) => {
     setMessageHash(hash);
-  };
+  }, []);
 
   return (
     <div className="w-full space-y-8">
@@ -42,23 +38,18 @@ export function DigitalSignature() {
         </p>
       </div>
 
-      <HashMessage onMessageHash={handleMessageHash} onCopy={handleCopy} />
+      <HashMessage onMessageHash={handleMessageHash} />
 
-      <SignMessage
-        messageHash={messageHash}
-        onSignature={handleSignature}
-        onCopy={handleCopy}
-      />
+      <SignMessage messageHash={messageHash} onSignature={handleSignature} />
 
       <RecoverPublicKey
         messageHash={messageHash}
         signature={signature}
         recovery={recovery}
         onPublicKey={handlePublicKey}
-        onCopy={handleCopy}
       />
 
-      <GenerateAddress publicKey={publicKey} onCopy={handleCopy} />
+      <GenerateAddress publicKey={publicKey} />
 
       <VerifySignature />
     </div>

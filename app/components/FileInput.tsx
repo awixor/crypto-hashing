@@ -1,3 +1,7 @@
+"use client";
+
+import { useRef } from "react";
+
 interface FileInputProps {
   onFileSelect: (file: File | null) => void;
   selectedFile: File | null;
@@ -9,6 +13,8 @@ export function FileInput({
   selectedFile,
   isLoading = false,
 }: FileInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     onFileSelect(file);
@@ -16,10 +22,8 @@ export function FileInput({
 
   const handleClear = () => {
     onFileSelect(null);
-    const input = document.getElementById("file-input") as HTMLInputElement;
-
-    if (input) {
-      input.value = "";
+    if (inputRef.current) {
+      inputRef.current.value = "";
     }
   };
 
@@ -51,12 +55,14 @@ export function FileInput({
           }`}
         >
           <input
+            ref={inputRef}
             id="file-input"
             type="file"
             onChange={handleFileChange}
             className="hidden"
             accept="image/*,.pdf,.doc,.docx,.txt"
             disabled={isLoading}
+            aria-label="Upload file"
           />
           <span className="text-sm text-zinc-600 dark:text-zinc-400">
             {isLoading
@@ -76,6 +82,7 @@ export function FileInput({
             <button
               onClick={handleClear}
               className="px-6 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              aria-label="Clear selected file"
             >
               Clear
             </button>
